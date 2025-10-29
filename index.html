@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuron Tools | Ваша Экосистема Утилит</title>
+
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+    
+    <style>
+        /* ==================== ОСНОВНЫЕ СТИЛИ ==================== */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #1a73e8;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        /* ==================== СТИЛИ ВКЛАДОК (ТАБОВ) ==================== */
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .tab-button {
+            background-color: transparent;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            color: #555;
+            transition: color 0.3s, border-bottom 0.3s;
+        }
+
+        .tab-button.active {
+            color: #1a73e8;
+            border-bottom: 3px solid #1a73e8;
+            font-weight: 600;
+        }
+
+        .tab-content {
+            display: none;
+            padding-top: 20px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ==================== ОБЩИЕ СТИЛИ ФОРМ ==================== */
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button.primary-btn {
+            background-color: #1a73e8;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        button.primary-btn:hover {
+            background-color: #0c5bb5;
+        }
+
+        /* ==================== СТИЛИ QR ГЕНЕРАТОРА ==================== */
+        #qrOutputContainer {
+            margin-top: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        #qrCombinedCanvas {
+            display: block;
+            margin-bottom: 10px;
+            border: 1px solid #eee;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        #downloadBtn {
+            margin-top: 15px;
+            background-color: #28a745; 
+        }
+
+        #downloadBtn:hover {
+            background-color: #218838;
+        }
+
+
+        /* ==================== СТИЛИ EXIF VIEWER ==================== */
+        #imagePreview {
+            max-width: 100%;
+            max-height: 250px;
+            margin-top: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        #exifData {
+            text-align: left;
+            margin-top: 30px;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        #exifData h3 {
+            color: #1a73e8;
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+
+        #exifData p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        #exifData strong {
+            color: #555;
+            display: inline-block;
+            width: 160px;
+            font-weight: 500;
+        }
+
+        .no-data {
+            color: #888;
+            font-style: italic;
+        }
+
+        #mapLinkContainer a {
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        /* ==================== СТИЛИ Unit Converter (Заглушка) ==================== */
+        .converter-note {
+            text-align: center;
+            padding: 40px 10px;
+            background-color: #e9f0ff;
+            border-radius: 8px;
+            color: #1a73e8;
+        }
+        
+        .converter-note a {
+            color: #0c5bb5;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Neuron Tools ⚡</h1>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'qrGenerator')">QR-Генератор</button>
+            <button class="tab-button" onclick="openTab(event, 'exifViewer')">EXIF-Viewer</button>
+            <button class="tab-button" onclick="openTab(event, 'unitConverter')">Конвертер Валют</button>
+        </div>
+
+        <div id="qrGenerator" class="tab-content active">
+            <h2>Генератор QR-кодов</h2>
+            <input type="text" id="dataInput" placeholder="Введите текст или ссылку для QR-кода">
+            <button class="primary-btn" onclick="generateQR()">Сгенерировать QR-код</button>
+
+            <div id="qrOutputContainer" style="display: none;">
+                <canvas id="qrCombinedCanvas"></canvas>
+                <button id="downloadBtn" onclick="downloadQR()">Скачать PNG с подписью</button>
+            </div>
+        </div>
+
+        <div id="exifViewer" class="tab-content">
+            <h2>Просмотрщик Метаданных Изображений</h2>
+            <p style="text-align: center; margin-bottom: 20px;">Выберите файл. Все данные обрабатываются только в вашем браузере.</p>
+            <input type="file" id="imageInput" accept="image/*">
+            <img id="imagePreview" src="#" alt="Предварительный просмотр изображения">
+            
+            <div id="exifData" style="display: none;">
+                
+<h3>Основная информация</h3>
+                <p><strong>Имя файла:</strong> <span id="fileName"></span></p>
+                <p><strong>Размер файла:</strong> <span id="fileSize"></span></p>
+                <p><strong>Разрешение:</strong> <span id="resolution"></span></p>
+
+                <h3>Информация о камере</h3>
+                <p><strong>Производитель:</strong> <span id="make"></span></p>
+                <p><strong>Модель камеры:</strong> <span id="model"></span></p>
+                <p><strong>Дата и время снимка:</strong> <span id="dateTime"></span></p>
+                <p><strong>Программное обеспечение:</strong> <span id="software"></span></p>
+
+                <h3>Настройки снимка</h3>
+                <p><strong>Выдержка:</strong> <span id="exposureTime"></span></p>
+                <p><strong>Диафрагма (F-число):</strong> <span id="fNumber"></span></p>
+                <p><strong>ISO:</strong> <span id="isoSpeedRatings"></span></p>
+                <p><strong>Фокусное расстояние:</strong> <span id="focalLength"></span></p>
+                <p><strong>Режим вспышки:</strong> <span id="flash"></span></p>
+
+                <h3>Геолокация</h3>
+                <p><strong>Широта:</strong> <span id="latitude"></span></p>
+                <p><strong>Долгота:</strong> <span id="longitude"></span></p>
+                <p id="mapLinkContainer" style="margin-top: 10px;"></p>
+            </div>
+        </div>
+
+        <div id="unitConverter" class="tab-content">
+            <h2>Конвертер Валют</h2>
+            <div class="converter-note">
+                <p>Конвертер Валют является самостоятельным проектом вашей экосистемы.</p>
+                <p>Перейти на основной сайт:</p>
+                <p><a href="https://neuron-ecosystem.github.io/Unit-Converter/" target="_blank">https://neuron-ecosystem.github.io/Unit-Converter/</a></p>
+            </div>
+        </div>
+
+    </div>
+    
+    <div class="container" style="text-align: center; background-color: #e9f0ff; border: 2px solid #1a73e8;">
+        <p style="font-size: 18px; font-weight: bold; color: #1a73e8;">🔥 Neuron Digital Studio: Твой цифровой прорыв!</p>
+        <p>Нужен не только инструмент, но и готовый брендинг? Мы создаем сайты, логотипы и продающий контент.</p>
+        <a href="https://t.me/neuron_ecosystem" target="_blank" style="display: inline-block; margin-top: 10px; padding: 10px 25px; background-color: #1a73e8; color: white; border-radius: 5px; text-decoration: none;">Связаться с нами!</a>
+    </div>
+
+<script>
+    // ==================== ФУНКЦИИ ВКЛАДОК ====================
+
+    function openTab(evt, tabName) {
+        // Объявление переменных
+        let i, tabcontent, tablinks;
+
+        // Получение всех элементов с class="tab-content" и скрытие их
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+
+        // Получение всех элементов с class="tab-button" и удаление класса "active"
+        tablinks = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(" active", "");
+        }
+
+        // Показ текущей вкладки и добавление класса "active" кнопке
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    // Открываем первую вкладку по умолчанию
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelector(".tab-content").style.display = "block";
+    });
+
+
+    // ==================== ФУНКЦИИ QR-ГЕНЕРАТОРА ====================
+
+    let qrcodeInstance = null;
+    const qrOutputContainer = document.getElementById('qrOutputContainer');
+    const qrCombinedCanvas = document.getElementById('qrCombinedCanvas');
+    const brandingText = "by Neuron Ecosystem";
+
+    function generateQR() {
+        const data = document.getElementById('dataInput').value.trim();
+
+        if (data === "") {
+            alert("Пожалуйста, введите текст или ссылку!");
+            qrOutputContainer.style.display = 'none';
+            return;
+        }
+
+        const qrSize = 256;
+        const textHeight = 40;
+        qrCombinedCanvas.width = qrSize;
+        qrCombinedCanvas.height = qrSize + textHeight;
+
+        const ctx = qrCombinedCanvas.getContext('2d');
+        ctx.clearRect(0, 0, qrCombinedCanvas.width, qrCombinedCanvas.height);
+
+        const tempQrDiv = document.createElement('div');
+        tempQrDiv.style.display = 'none';
+        document.body.appendChild(tempQrDiv);
+
+        if (qrcodeInstance) {
+            qrcodeInstance.clear();
+        }
+        
+        qrcodeInstance = new QRCode(tempQrDiv, {
+            text: data,
+            width: qrSize,
+            height: qrSize,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        setTimeout(() => {
+            const qrImage = tempQrDiv.querySelector('img') || tempQrDiv.querySelector('canvas');
+            if (qrImage) {
+                // 1. Копируем QR-код на комбинированный canvas
+                ctx.fillStyle = "white";
+                ctx.fillRect(0, 0, qrSize, qrCombinedCanvas.height); // Заливка фона белым
+                ctx.drawImage(qrImage, 0, 0, qrSize, qrSize);
+
+                // 2. Добавляем рекламную подпись
+                ctx.fillStyle = "#1a73e8"; 
+                ctx.font = "italic bold 16px 'Segoe UI', Roboto, sans-serif";
+                ctx.textAlign = "center";
+                ctx.fillText(brandingText, qrSize / 2, qrSize + (textHeight / 2) + 5);
+
+                qrOutputContainer.style.display = 'flex';
+            } else {
+                console.error("Не удалось получить изображение QR-кода.");
+                alert("Ошибка при генерации QR-кода. Попробуйте еще раз.");
+                qrOutputContainer.style.display = 'none';
+            }
+            document.body.removeChild(tempQrDiv);
+        }, 100); 
+    }
+
+    function downloadQR() {
+        const link = document.createElement('a');
+        link.download = 'neuron_qr_code_with_branding.png';
+        link.href = qrCombinedCanvas.toDataURL("image/png");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+
+    // ==================== ФУНКЦИИ EXIF VIEWER ====================
+
+    document.getElementById('imageInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (!file) { return; }
+
+        const imagePreview = document.getElementById('imagePreview');
+        const exifDataContainer = document.getElementById('exifData');
+        const mapLinkContainer = document.getElementById('mapLinkContainer');
+
+        // Сброс
+        imagePreview.src = '#';
+        imagePreview.style.display = 'none';
+        exifDataContainer.style.display = 'none';
+        mapLinkContainer.innerHTML = '';
+        resetExifFields();
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            imagePreview.src = e.target.result;
+            imagePreview.style.display = 'block';
+
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatBytes(file.size);
+
+            EXIF.getData(file, function() {
+                const exif = EXIF.getAllTags(this);
+
+                // Заполнение полей
+                fillExifField('make', exif.Make);
+                fillExifField('model', exif.Model);
+                fillExifField('software', exif.Software);
+                fillExifField('dateTime', exif.DateTimeOriginal || exif.DateTime);
+                fillExifField('exposureTime', exif.ExposureTime ? exif.ExposureTime + ' сек' : null);
+                fillExifField('fNumber', exif.FNumber ? 'f/' + exif.FNumber : null);
+                fillExifField('isoSpeedRatings', exif.ISOSpeedRatings);
+                fillExifField('focalLength', exif.FocalLength ? exif.FocalLength + ' мм' : null);
+                fillExifField('flash', formatFlash(exif.Flash));
+
+                // Разрешение
+                const img = new Image();
+                img.onload = function() {
+                    document.getElementById('resolution').textContent = `${img.width}x${img.height} px`;
+                };
+                img.src = e.target.result;
+
+                // Геолокация
+                const latitude = EXIF.getTag(this, 'GPSLatitude');
+                const longitude = EXIF.getTag(this, 'GPSLongitude');
+
+                if (latitude && longitude) {
+                    const latRef = EXIF.getTag(this, 'GPSLatitudeRef') || 'N';
+                    const lonRef = EXIF.getTag(this, 'GPSLongitudeRef') || 'E';
+
+                    const lat = convertDMSToDD(latitude, latRef);
+                    const lon = convertDMSToDD(longitude, lonRef);
+
+                    fillExifField('latitude', lat.toFixed(6) + (latRef === 'N' ? '° с.ш.' : '° ю.ш.'));
+                    fillExifField('longitude', lon.toFixed(6) + (lonRef === 'E' ? '° в.д.' : '° з.д.'));
+
+                    // Ссылка на Google Maps
+                    const mapLink = document.createElement('a');
+                    mapLink.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+                    mapLink.target = '_blank';
+                    mapLink.textContent = 'Посмотреть на карте';
+                    mapLinkContainer.appendChild(mapLink);
+                } else {
+                    fillExifField('latitude', null);
+                    fillExifField('longitude', null);
+                }
+
+                exifDataContainer.style.display = 'block';
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Вспомогательные функции для EXIF Viewer
+    function fillExifField(id, value) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value || 'Нет данных';
+            if (!value) {
+                element.classList.add('no-data');
+            } else {
+                element.classList.remove('no-data');
+            }
+        }
+    }
+
+    function resetExifFields() {
+        const fields = ['fileName', 'fileSize', 'resolution', 'make', 'model', 'software',
+                        'dateTime', 'exposureTime', 'fNumber', 'isoSpeedRatings', 'focalLength', 'flash',
+                        'latitude', 'longitude'];
+        fields.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = '';
+                element.classList.remove('no-data');
+            }
+        });
+    }
+
+    function formatBytes(bytes, decimals = 2) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const dm = decimals < 0 ? 0 : decimals;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    function convertDMSToDD(dms, ref) {
+        let degrees = dms[0] + dms[1] / 60 + dms[2] / 3600;
+        if (ref == 'S' || ref == 'W') {
+            degrees = -degrees;
+        }
+        return degrees;
+    }
+
+    function formatFlash(flashValue) {
+        if (flashValue === undefined) return null;
+        // Здесь можно добавить более подробный перевод, как в предыдущем ответе.
+        // Для краткости:
+        if (flashValue & 0x1) return "Срабатывала";
+        if (flashValue & 0x20) return "Не обнаружена";
+        if (flashValue & 0x40) return "Принудительно выключена";
+        return "Неизвестно (" + flashValue + ")";
+    }
+</script>
+
+</body>
+</html>
