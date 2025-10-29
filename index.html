@@ -41,7 +41,6 @@
             display: flex;
             margin-bottom: 20px;
             border-bottom: 2px solid #ddd;
-            /* Обеспечиваем прокрутку, если вкладок слишком много */
             overflow-x: auto; 
         }
 
@@ -53,7 +52,7 @@
             font-size: 16px;
             color: #555;
             transition: color 0.3s, border-bottom 0.3s;
-            white-space: nowrap; /* Не даем тексту в кнопке переноситься */
+            white-space: nowrap; 
         }
 
         .tab-button.active {
@@ -109,8 +108,9 @@
             box-sizing: border-box;
             font-size: 16px;
             line-height: 1.6;
-            /* Включаем нативную проверку орфографии браузера */
             -webkit-user-modify: read-write; 
+            outline: none; /* Убираем стандартную рамку фокуса */
+            /* Чтобы курсор и ввод работали корректно */
         }
 
         #statsContainer {
@@ -143,7 +143,7 @@
         }
 
 
-        /* ==================== СТИЛИ ДЛЯ ДРУГИХ ИНСТРУМЕНТОВ (Сокращены для фокуса) ==================== */
+        /* ==================== СТИЛИ ДЛЯ ДРУГИХ ИНСТРУМЕНТОВ ==================== */
         #qrOutputContainer {
             margin-top: 20px;
             text-align: center;
@@ -201,13 +201,13 @@
         <h1>Neuron Tools ⚡</h1>
 
         <div class="tabs">
-            <button class="tab-button active" onclick="openTab(event, 'textAnalyzer')">Анализатор Текста</button>
+            <button class="tab-button" id="defaultOpen" onclick="openTab(event, 'textAnalyzer')">Анализатор Текста</button>
             <button class="tab-button" onclick="openTab(event, 'qrGenerator')">QR-Генератор</button>
             <button class="tab-button" onclick="openTab(event, 'exifViewer')">EXIF-Viewer</button>
             <button class="tab-button" onclick="openTab(event, 'unitConverter')">Конвертер Валют</button>
         </div>
 
-        <div id="textAnalyzer" class="tab-content active">
+        <div id="textAnalyzer" class="tab-content">
             <h2>Анализатор Текста и Орфографии</h2>
             <div id="textInput" contenteditable="true" spellcheck="true" oninput="analyzeText()" placeholder="Начните вводить или вставьте текст сюда..." style="resize: vertical;"></div>
             <p style="font-size: 12px; color: #888; margin-top: -15px;">* Орфографические ошибки выделяются браузером (красным)</p>
@@ -287,7 +287,6 @@
 
 <script>
     // ==================== ГЛОБАЛЬНЫЕ НАСТРОЙКИ (Стоп-слова) ====================
-    // Стоп-слова (наиболее частые предлоги, союзы, местоимения и т.д. на русском)
     const stopWords = new Set([
         'и', 'в', 'на', 'с', 'по', 'за', 'от', 'до', 'из', 'у', 'к', 'о', 'об', 'а', 'но', 'да', 
         'или', 'если', 'как', 'что', 'это', 'тот', 'этот', 'он', 'она', 'оно', 'они', 'я', 'мы', 
@@ -296,12 +295,13 @@
     ]);
 
 
-    // ==================== ФУНКЦИИ АНАЛИЗАТОРА ТЕКСТА (НОВЫЕ ФУНКЦИИ) ====================
+    // ==================== ФУНКЦИИ АНАЛИЗАТОРА ТЕКСТА (ИСПРАВЛЕНО) ====================
 
     function analyzeText() {
         const textInput = document.getElementById('textInput');
-        // Используем textContent для корректного сбора текста
-        const text = textInput.textContent.trim(); 
+        // Используем innerText для корректного сбора текста из contenteditable
+        const rawText = textInput.innerText || textInput.textContent || "";
+        const text = rawText.trim(); 
 
         // 1. Подсчет символов
         const charCount = text.length;
@@ -311,21 +311,24 @@
         document.getElementById('charNoSpaceCount').textContent = charNoSpaceCount;
 
         // 2. Подсчет слов и анализ частоты
-        // Регулярное выражение для извлечения слов (буквы, цифры)
-        const words = text.toLowerCase().match(/\b[\w\d]+\b/g) || [];
+        // Удаляем знаки пунктуации и приводим к нижнему регистру
+        const cleanedText = text.replace(/[^а-яa-zё0-9\s]/gi, ' ').toLowerCase();
+        
+        // Разбиваем текст на массив слов, фильтруя пустые строки
+        const words = cleanedText.split(/\s+/).filter(word => word.length > 0);
         const wordCount = words.length;
         document.getElementById('wordCount').textContent = wordCount;
 
         // 3. Время на чтение (среднее 225 слов в минуту)
         const readingSpeed = 225; 
         const minutes = wordCount / readingSpeed;
-        const readTimeDisplay = minutes < 1 ? '<1 мин' : `${Math.ceil(minutes)} мин`;
-        document.getElementById('readTime').textContent = readTimeDisplay;
+        const readTimeDisplay = wordCount === 0 ? '0 мин' : minutes < 1 ? '<1 мин' : `${Math.ceil(minutes)} мин`;
+        document.getElementById('readTime').textContent = readTimeDisplay; // Исправлено
 
         // 4. Анализ частоты слов (Топ-5)
         const wordFrequency = {};
         words.forEach(word => {
-            // Исключаем стоп-слова
+            // Исключаем стоп-слова и очень короткие слова
             if (!stopWords.has(word) && word.length > 1) { 
                 wordFrequency[word] = (wordFrequency[word] || 0) + 1;
             }
@@ -334,26 +337,23 @@
         // Сортировка по частоте
         const sortedWords = Object.entries(wordFrequency)
             .sort(([, countA], [, countB]) => countB - countA)
-            .slice(0, 5); // Берем Топ-5
+            .slice(0, 5); 
 
         // Вывод списка
         const topWordsList = document.getElementById('topWordsList');
-        topWordsList.innerHTML = ''; // Очищаем старый список
+        topWordsList.innerHTML = ''; 
 
         if (sortedWords.length === 0) {
             topWordsList.innerHTML = '<li>Нет данных (текст слишком короткий или состоит из стоп-слов)</li>';
         } else {
             sortedWords.forEach(([word, count]) => {
                 const li = document.createElement('li');
-                li.innerHTML = `<strong>${word}</strong>: ${count} раз`;
+                const displayWord = word.charAt(0).toUpperCase() + word.slice(1);
+                li.innerHTML = `<strong>${displayWord}</strong>: ${count} раз`;
                 topWordsList.appendChild(li);
             });
         }
-        
-        // *Примечание по орфографии: Используем contenteditable="true" и spellcheck="true" 
-        // в HTML для нативной проверки браузера.
     }
-
 
     // ==================== ФУНКЦИИ ВКЛАДОК (ОБЩИЕ) ====================
 
@@ -373,7 +373,6 @@
         document.getElementById(tabName).style.display = "block";
         evt.currentTarget.className += " active";
         
-        // Активируем анализ текста, если переключились на эту вкладку
         if (tabName === 'textAnalyzer') {
             analyzeText();
         }
@@ -381,23 +380,32 @@
 
     // Открываем Анализатор Текста по умолчанию
     document.addEventListener("DOMContentLoaded", function() {
+        // Устанавливаем Анализатор Текста по умолчанию
         document.getElementById("textAnalyzer").style.display = "block";
-        document.querySelector(".tabs .tab-button").classList.add("active");
+        document.getElementById("defaultOpen").classList.add("active");
         
-        // Добавляем плейсхолдер для contenteditable
+        // Установка плейсхолдера и первичный анализ
         const textInput = document.getElementById('textInput');
-        if (!textInput.textContent.trim()) {
-            textInput.textContent = textInput.getAttribute('placeholder');
-            textInput.style.color = '#999'; 
-            setTimeout(() => {
-                textInput.textContent = '';
-                textInput.style.color = '#333'; 
-            }, 10);
-        }
+        // Добавление обработчика для очистки плейсхолдера
+        textInput.addEventListener('focus', function() {
+            if (this.textContent.trim() === this.getAttribute('placeholder')) {
+                this.textContent = '';
+            }
+            this.style.color = '#333'; 
+        });
+        textInput.addEventListener('blur', function() {
+            if (this.textContent.trim() === '') {
+                this.textContent = this.getAttribute('placeholder');
+                this.style.color = '#999'; 
+            }
+        });
+        textInput.textContent = textInput.getAttribute('placeholder');
+        textInput.style.color = '#999'; 
+        
         analyzeText();
     });
 
-    // ==================== ФУНКЦИИ QR-ГЕНЕРАТОРА (СУЩЕСТВУЮЩИЕ) ====================
+    // ==================== ФУНКЦИИ QR-ГЕНЕРАТОРА ====================
 
     let qrcodeInstance = null;
     const qrOutputContainer_qr = document.getElementById('qrOutputContainer');
@@ -469,7 +477,7 @@
     }
 
 
-    // ==================== ФУНКЦИИ EXIF VIEWER (СУЩЕСТВУЮЩИЕ) ====================
+    // ==================== ФУНКЦИИ EXIF VIEWER ====================
 
     document.getElementById('imageInput').addEventListener('change', function(event) {
         const file = event.target.files[0];
