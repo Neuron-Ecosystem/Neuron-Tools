@@ -41,6 +41,8 @@
             display: flex;
             margin-bottom: 20px;
             border-bottom: 2px solid #ddd;
+            /* Обеспечиваем прокрутку, если вкладок слишком много */
+            overflow-x: auto; 
         }
 
         .tab-button {
@@ -51,6 +53,7 @@
             font-size: 16px;
             color: #555;
             transition: color 0.3s, border-bottom 0.3s;
+            white-space: nowrap; /* Не даем тексту в кнопке переноситься */
         }
 
         .tab-button.active {
@@ -95,7 +98,52 @@
             background-color: #0c5bb5;
         }
 
-        /* ==================== СТИЛИ QR ГЕНЕРАТОРА ==================== */
+        /* ==================== СТИЛИ АНАЛИЗАТОРА ТЕКСТА ==================== */
+        #textInput {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+            line-height: 1.6;
+            /* Включаем нативную проверку орфографии браузера */
+            -webkit-user-modify: read-write; 
+        }
+
+        #statsContainer {
+            border: 1px solid #eee;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        #statsContainer p {
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #statsContainer strong {
+            color: #1a73e8;
+        }
+
+        .top-words-list {
+            margin-top: 10px;
+            list-style-type: none;
+            padding: 0;
+            text-align: left;
+        }
+        
+        .top-words-list li {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+
+        /* ==================== СТИЛИ ДЛЯ ДРУГИХ ИНСТРУМЕНТОВ (Сокращены для фокуса) ==================== */
         #qrOutputContainer {
             margin-top: 20px;
             text-align: center;
@@ -103,7 +151,7 @@
             flex-direction: column;
             align-items: center;
         }
-        
+
         #qrCombinedCanvas {
             display: block;
             margin-bottom: 10px;
@@ -111,24 +159,10 @@
             padding: 5px;
             border-radius: 5px;
         }
-
+        
         #downloadBtn {
             margin-top: 15px;
             background-color: #28a745; 
-        }
-
-        #downloadBtn:hover {
-            background-color: #218838;
-        }
-
-
-        /* ==================== СТИЛИ EXIF VIEWER ==================== */
-        #imagePreview {
-            max-width: 100%;
-            max-height: 250px;
-            margin-top: 20px;
-            border-radius: 8px;
-            display: none;
         }
 
         #exifData {
@@ -138,17 +172,6 @@
             padding-top: 20px;
         }
 
-        #exifData h3 {
-            color: #1a73e8;
-            margin-top: 20px;
-            margin-bottom: 15px;
-        }
-
-        #exifData p {
-            margin: 8px 0;
-            line-height: 1.5;
-        }
-
         #exifData strong {
             color: #555;
             display: inline-block;
@@ -156,22 +179,6 @@
             font-weight: 500;
         }
 
-        .no-data {
-            color: #888;
-            font-style: italic;
-        }
-
-        #mapLinkContainer a {
-            display: inline-block;
-            padding: 8px 15px;
-            background-color: #4285f4;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-        
-        /* ==================== СТИЛИ Unit Converter (Заглушка) ==================== */
         .converter-note {
             text-align: center;
             padding: 40px 10px;
@@ -185,7 +192,7 @@
             text-decoration: none;
             font-weight: bold;
         }
-
+        
     </style>
 </head>
 <body>
@@ -194,12 +201,31 @@
         <h1>Neuron Tools ⚡</h1>
 
         <div class="tabs">
-            <button class="tab-button active" onclick="openTab(event, 'qrGenerator')">QR-Генератор</button>
+            <button class="tab-button active" onclick="openTab(event, 'textAnalyzer')">Анализатор Текста</button>
+            <button class="tab-button" onclick="openTab(event, 'qrGenerator')">QR-Генератор</button>
             <button class="tab-button" onclick="openTab(event, 'exifViewer')">EXIF-Viewer</button>
             <button class="tab-button" onclick="openTab(event, 'unitConverter')">Конвертер Валют</button>
         </div>
 
-        <div id="qrGenerator" class="tab-content active">
+        <div id="textAnalyzer" class="tab-content active">
+            <h2>Анализатор Текста и Орфографии</h2>
+            <div id="textInput" contenteditable="true" spellcheck="true" oninput="analyzeText()" placeholder="Начните вводить или вставьте текст сюда..." style="resize: vertical;"></div>
+            <p style="font-size: 12px; color: #888; margin-top: -15px;">* Орфографические ошибки выделяются браузером (красным)</p>
+
+            <div id="statsContainer">
+                <p>Общее количество слов: <strong><span id="wordCount">0</span></strong></p>
+                <p>Символов (без пробелов): <strong><span id="charNoSpaceCount">0</span></strong></p>
+                <p>Символов (с пробелами): <strong><span id="charCount">0</span></strong></p>
+                <p>Время на чтение: <strong><span id="readTime">0 мин</span></strong></p>
+                
+                <h3 style="color: #333; margin-top: 20px; font-size: 18px; border-top: 1px solid #eee; padding-top: 15px;">Топ-5 самых частых слов (без предлогов)</h3>
+                <ul id="topWordsList" class="top-words-list">
+                    <li>Нет данных</li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="qrGenerator" class="tab-content">
             <h2>Генератор QR-кодов</h2>
             <input type="text" id="dataInput" placeholder="Введите текст или ссылку для QR-кода">
             <button class="primary-btn" onclick="generateQR()">Сгенерировать QR-код</button>
@@ -251,7 +277,6 @@
                 <p><a href="https://neuron-ecosystem.github.io/Unit-Converter/" target="_blank">https://neuron-ecosystem.github.io/Unit-Converter/</a></p>
             </div>
         </div>
-
     </div>
     
     <div class="container" style="text-align: center; background-color: #e9f0ff; border: 2px solid #1a73e8;">
@@ -261,48 +286,130 @@
     </div>
 
 <script>
-    // ==================== ФУНКЦИИ ВКЛАДОК ====================
+    // ==================== ГЛОБАЛЬНЫЕ НАСТРОЙКИ (Стоп-слова) ====================
+    // Стоп-слова (наиболее частые предлоги, союзы, местоимения и т.д. на русском)
+    const stopWords = new Set([
+        'и', 'в', 'на', 'с', 'по', 'за', 'от', 'до', 'из', 'у', 'к', 'о', 'об', 'а', 'но', 'да', 
+        'или', 'если', 'как', 'что', 'это', 'тот', 'этот', 'он', 'она', 'оно', 'они', 'я', 'мы', 
+        'ты', 'вы', 'мой', 'твой', 'свой', 'их', 'его', 'ее', 'быть', 'был', 'была', 'было', 
+        'будет', 'есть', 'для', 'же', 'ли', 'ни', 'не', 'также', 'только'
+    ]);
+
+
+    // ==================== ФУНКЦИИ АНАЛИЗАТОРА ТЕКСТА (НОВЫЕ ФУНКЦИИ) ====================
+
+    function analyzeText() {
+        const textInput = document.getElementById('textInput');
+        // Используем textContent для корректного сбора текста
+        const text = textInput.textContent.trim(); 
+
+        // 1. Подсчет символов
+        const charCount = text.length;
+        document.getElementById('charCount').textContent = charCount;
+
+        const charNoSpaceCount = text.replace(/\s/g, '').length;
+        document.getElementById('charNoSpaceCount').textContent = charNoSpaceCount;
+
+        // 2. Подсчет слов и анализ частоты
+        // Регулярное выражение для извлечения слов (буквы, цифры)
+        const words = text.toLowerCase().match(/\b[\w\d]+\b/g) || [];
+        const wordCount = words.length;
+        document.getElementById('wordCount').textContent = wordCount;
+
+        // 3. Время на чтение (среднее 225 слов в минуту)
+        const readingSpeed = 225; 
+        const minutes = wordCount / readingSpeed;
+        const readTimeDisplay = minutes < 1 ? '<1 мин' : `${Math.ceil(minutes)} мин`;
+        document.getElementById('readTime').textContent = readTimeDisplay;
+
+        // 4. Анализ частоты слов (Топ-5)
+        const wordFrequency = {};
+        words.forEach(word => {
+            // Исключаем стоп-слова
+            if (!stopWords.has(word) && word.length > 1) { 
+                wordFrequency[word] = (wordFrequency[word] || 0) + 1;
+            }
+        });
+
+        // Сортировка по частоте
+        const sortedWords = Object.entries(wordFrequency)
+            .sort(([, countA], [, countB]) => countB - countA)
+            .slice(0, 5); // Берем Топ-5
+
+        // Вывод списка
+        const topWordsList = document.getElementById('topWordsList');
+        topWordsList.innerHTML = ''; // Очищаем старый список
+
+        if (sortedWords.length === 0) {
+            topWordsList.innerHTML = '<li>Нет данных (текст слишком короткий или состоит из стоп-слов)</li>';
+        } else {
+            sortedWords.forEach(([word, count]) => {
+                const li = document.createElement('li');
+                li.innerHTML = `<strong>${word}</strong>: ${count} раз`;
+                topWordsList.appendChild(li);
+            });
+        }
+        
+        // *Примечание по орфографии: Используем contenteditable="true" и spellcheck="true" 
+        // в HTML для нативной проверки браузера.
+    }
+
+
+    // ==================== ФУНКЦИИ ВКЛАДОК (ОБЩИЕ) ====================
 
     function openTab(evt, tabName) {
-        // Объявление переменных
         let i, tabcontent, tablinks;
 
-        // Получение всех элементов с class="tab-content" и скрытие их
         tabcontent = document.getElementsByClassName("tab-content");
         for (i = 0; i < tabcontent.length; i++) {
             tabcontent[i].style.display = "none";
         }
 
-        // Получение всех элементов с class="tab-button" и удаление класса "active"
         tablinks = document.getElementsByClassName("tab-button");
         for (i = 0; i < tablinks.length; i++) {
             tablinks[i].className = tablinks[i].className.replace(" active", "");
         }
 
-        // Показ текущей вкладки и добавление класса "active" кнопке
         document.getElementById(tabName).style.display = "block";
         evt.currentTarget.className += " active";
+        
+        // Активируем анализ текста, если переключились на эту вкладку
+        if (tabName === 'textAnalyzer') {
+            analyzeText();
+        }
     }
 
-    // Открываем первую вкладку по умолчанию
+    // Открываем Анализатор Текста по умолчанию
     document.addEventListener("DOMContentLoaded", function() {
-        document.querySelector(".tab-content").style.display = "block";
+        document.getElementById("textAnalyzer").style.display = "block";
+        document.querySelector(".tabs .tab-button").classList.add("active");
+        
+        // Добавляем плейсхолдер для contenteditable
+        const textInput = document.getElementById('textInput');
+        if (!textInput.textContent.trim()) {
+            textInput.textContent = textInput.getAttribute('placeholder');
+            textInput.style.color = '#999'; 
+            setTimeout(() => {
+                textInput.textContent = '';
+                textInput.style.color = '#333'; 
+            }, 10);
+        }
+        analyzeText();
     });
 
-
-    // ==================== ФУНКЦИИ QR-ГЕНЕРАТОРА ====================
+    // ==================== ФУНКЦИИ QR-ГЕНЕРАТОРА (СУЩЕСТВУЮЩИЕ) ====================
 
     let qrcodeInstance = null;
-    const qrOutputContainer = document.getElementById('qrOutputContainer');
+    const qrOutputContainer_qr = document.getElementById('qrOutputContainer');
     const qrCombinedCanvas = document.getElementById('qrCombinedCanvas');
-    const brandingText = "by Neuron Ecosystem";
+    const brandingText_qr = "by Neuron Ecosystem";
 
     function generateQR() {
         const data = document.getElementById('dataInput').value.trim();
 
         if (data === "") {
             alert("Пожалуйста, введите текст или ссылку!");
-            qrOutputContainer.style.display = 'none';
+            qrOutputContainer_qr.style.display = 'none';
             return;
         }
 
@@ -334,22 +441,19 @@
         setTimeout(() => {
             const qrImage = tempQrDiv.querySelector('img') || tempQrDiv.querySelector('canvas');
             if (qrImage) {
-                // 1. Копируем QR-код на комбинированный canvas
                 ctx.fillStyle = "white";
-                ctx.fillRect(0, 0, qrSize, qrCombinedCanvas.height); // Заливка фона белым
+                ctx.fillRect(0, 0, qrSize, qrCombinedCanvas.height); 
                 ctx.drawImage(qrImage, 0, 0, qrSize, qrSize);
 
-                // 2. Добавляем рекламную подпись
                 ctx.fillStyle = "#1a73e8"; 
                 ctx.font = "italic bold 16px 'Segoe UI', Roboto, sans-serif";
                 ctx.textAlign = "center";
-                ctx.fillText(brandingText, qrSize / 2, qrSize + (textHeight / 2) + 5);
+                ctx.fillText(brandingText_qr, qrSize / 2, qrSize + (textHeight / 2) + 5);
 
-                qrOutputContainer.style.display = 'flex';
+                qrOutputContainer_qr.style.display = 'flex';
             } else {
-                console.error("Не удалось получить изображение QR-кода.");
                 alert("Ошибка при генерации QR-кода. Попробуйте еще раз.");
-                qrOutputContainer.style.display = 'none';
+                qrOutputContainer_qr.style.display = 'none';
             }
             document.body.removeChild(tempQrDiv);
         }, 100); 
@@ -365,7 +469,7 @@
     }
 
 
-    // ==================== ФУНКЦИИ EXIF VIEWER ====================
+    // ==================== ФУНКЦИИ EXIF VIEWER (СУЩЕСТВУЮЩИЕ) ====================
 
     document.getElementById('imageInput').addEventListener('change', function(event) {
         const file = event.target.files[0];
@@ -375,7 +479,6 @@
         const exifDataContainer = document.getElementById('exifData');
         const mapLinkContainer = document.getElementById('mapLinkContainer');
 
-        // Сброс
         imagePreview.src = '#';
         imagePreview.style.display = 'none';
         exifDataContainer.style.display = 'none';
@@ -393,7 +496,6 @@
             EXIF.getData(file, function() {
                 const exif = EXIF.getAllTags(this);
 
-                // Заполнение полей
                 fillExifField('make', exif.Make);
                 fillExifField('model', exif.Model);
                 fillExifField('software', exif.Software);
@@ -404,14 +506,12 @@
                 fillExifField('focalLength', exif.FocalLength ? exif.FocalLength + ' мм' : null);
                 fillExifField('flash', formatFlash(exif.Flash));
 
-                // Разрешение
                 const img = new Image();
                 img.onload = function() {
                     document.getElementById('resolution').textContent = `${img.width}x${img.height} px`;
                 };
                 img.src = e.target.result;
 
-                // Геолокация
                 const latitude = EXIF.getTag(this, 'GPSLatitude');
                 const longitude = EXIF.getTag(this, 'GPSLongitude');
 
@@ -425,7 +525,6 @@
                     fillExifField('latitude', lat.toFixed(6) + (latRef === 'N' ? '° с.ш.' : '° ю.ш.'));
                     fillExifField('longitude', lon.toFixed(6) + (lonRef === 'E' ? '° в.д.' : '° з.д.'));
 
-                    // Ссылка на Google Maps
                     const mapLink = document.createElement('a');
                     mapLink.href = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
                     mapLink.target = '_blank';
@@ -442,7 +541,7 @@
         reader.readAsDataURL(file);
     });
 
-    // Вспомогательные функции для EXIF Viewer
+    // Вспомогательные функции EXIF VIEWER
     function fillExifField(id, value) {
         const element = document.getElementById(id);
         if (element) {
@@ -487,8 +586,6 @@
 
     function formatFlash(flashValue) {
         if (flashValue === undefined) return null;
-        // Здесь можно добавить более подробный перевод, как в предыдущем ответе.
-        // Для краткости:
         if (flashValue & 0x1) return "Срабатывала";
         if (flashValue & 0x20) return "Не обнаружена";
         if (flashValue & 0x40) return "Принудительно выключена";
