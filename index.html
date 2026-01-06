@@ -39,6 +39,7 @@
         #authBtn {
             background-color: #1a73e8; color: white; border: none; padding: 10px 20px;
             border-radius: 20px; cursor: pointer; font-weight: 600; transition: 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .modal {
@@ -66,9 +67,12 @@
         input[type="text"], input[type="file"], #textInput {
             width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
         }
-        #textInput { min-height: 150px; outline: none; -webkit-user-modify: read-write; }
+        #textInput { min-height: 150px; outline: none; -webkit-user-modify: read-write; border: 1px solid #eee; padding: 10px; border-radius: 8px; }
         .primary-btn { background: #1a73e8; color: white; padding: 12px; border: none; border-radius: 6px; width: 100%; cursor: pointer; font-size: 16px; }
         .primary-btn:hover { background: #0c5bb5; }
+        
+        .footer-copyright { margin: 20px 0; font-size: 14px; color: #777; }
+        .footer-copyright a { color: #1a73e8; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -82,20 +86,24 @@
             <span class="close-modal" id="closeModal">&times;</span>
             <div id="loginForm">
                 <h2>Вход</h2>
-                <input type="email" id="loginEmail" placeholder="Email">
-                <input type="password" id="loginPassword" placeholder="Пароль">
-                <button class="primary-btn" id="btnLogin">Войти</button>
+                <div class="auth-form">
+                    <input type="email" id="loginEmail" placeholder="Email">
+                    <input type="password" id="loginPassword" placeholder="Пароль">
+                    <button class="primary-btn" id="btnLogin">Войти</button>
+                </div>
                 <button class="google-btn" id="btnGoogle">
                     <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Google
                 </button>
-                <p style="text-align:center; cursor:pointer; color:#1a73e8" id="toRegister">Нет аккаунта? Регистрация</p>
+                <p style="text-align:center; cursor:pointer; color:#1a73e8; margin-top:15px;" id="toRegister">Нет аккаунта? Регистрация</p>
             </div>
             <div id="registerForm" style="display:none">
                 <h2>Регистрация</h2>
-                <input type="email" id="regEmail" placeholder="Email">
-                <input type="password" id="regPassword" placeholder="Пароль">
-                <button class="primary-btn" id="btnRegister">Создать</button>
-                <p style="text-align:center; cursor:pointer; color:#1a73e8" id="toLogin">Есть аккаунт? Войти</p>
+                <div class="auth-form">
+                    <input type="email" id="regEmail" placeholder="Email">
+                    <input type="password" id="regPassword" placeholder="Пароль">
+                    <button class="primary-btn" id="btnRegister">Создать</button>
+                </div>
+                <p style="text-align:center; cursor:pointer; color:#1a73e8; margin-top:15px;" id="toLogin">Есть аккаунт? Войти</p>
             </div>
         </div>
     </div>
@@ -111,34 +119,39 @@
 
         <div id="textAnalyzer" class="tab-content">
             <div id="textInput" contenteditable="true" spellcheck="true" oninput="analyzeText()" placeholder="Введите текст..."></div>
-            <button class="primary-btn" onclick="saveTextHistory()">Сохранить результат анализа</button>
-            <div id="statsContainer">
+            <button class="primary-btn" onclick="saveTextHistory()">Сохранить результат в историю</button>
+            <div id="statsContainer" style="margin-top:15px;">
                 <p>Слов: <strong id="wordCount">0</strong></p>
                 <p>Символов: <strong id="charCount">0</strong></p>
             </div>
         </div>
 
         <div id="qrGenerator" class="tab-content">
-            <input type="text" id="dataInput" placeholder="Ссылка или текст">
-            <button class="primary-btn" onclick="generateQR()">Сгенерировать</button>
+            <input type="text" id="dataInput" placeholder="Введите ссылку или текст">
+            <button class="primary-btn" onclick="generateQR()">Сгенерировать QR</button>
             <div id="qrOutputContainer" style="display:none; text-align:center; margin-top:15px;">
                 <canvas id="qrCombinedCanvas"></canvas>
+                <div id="qrcode-hidden" style="display:none"></div>
             </div>
         </div>
 
         <div id="exifViewer" class="tab-content">
             <input type="file" id="imageInput" accept="image/*">
-            <div id="exifData" style="display:none">
-                <p>Модель: <span id="exifModel"></span></p>
-                <p>Дата: <span id="exifDate"></span></p>
+            <div id="exifData" style="display:none; background:#f9f9f9; padding:15px; border-radius:8px;">
+                <p><strong>Модель:</strong> <span id="exifModel"></span></p>
+                <p><strong>Параметры:</strong> <span id="exifDetails"></span></p>
             </div>
         </div>
 
         <div id="historyTab" class="tab-content">
-            <h2>Ваша активность</h2>
-            <div id="historyList">Загрузка истории...</div>
+            <h2 style="font-size: 18px;">Ваша активность</h2>
+            <div id="historyList">Загрузка данных...</div>
         </div>
     </div>
+
+    <footer class="footer-copyright">
+        <a href="https://neuron-p2p.ru" target="_blank">Neuron Ecosystem</a> 2026©
+    </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
@@ -160,61 +173,67 @@
         const db = getFirestore(app);
         const provider = new GoogleAuthProvider();
 
-        // Функции сохранения в историю
         window.saveToHistory = async function(tool, content) {
             const user = auth.currentUser;
+            const data = { tool, content, timestamp: new Date().toISOString() };
+            
             if (user) {
-                await addDoc(collection(db, "tools_history"), {
-                    uid: user.uid,
-                    tool: tool,
-                    content: content,
-                    timestamp: serverTimestamp()
-                });
+                try {
+                    await addDoc(collection(db, "tools_history"), {
+                        uid: user.uid,
+                        tool: tool,
+                        content: content,
+                        timestamp: serverTimestamp()
+                    });
+                } catch (e) { console.error("Firebase error:", e); }
             } else {
                 let local = JSON.parse(localStorage.getItem('neuron_history') || '[]');
-                local.unshift({ tool, content, timestamp: new Date().toISOString() });
+                local.unshift(data);
                 localStorage.setItem('neuron_history', JSON.stringify(local.slice(0, 20)));
             }
-            if(document.getElementById('historyTab').classList.contains('active')) loadHistory();
+            if(document.getElementById('historyTab').style.display === 'block') loadHistory();
         };
 
-        // Загрузка истории
         window.loadHistory = async function() {
             const list = document.getElementById('historyList');
-            list.innerHTML = '';
+            list.innerHTML = 'Загрузка...';
             const user = auth.currentUser;
-
             let items = [];
+
             if (user) {
                 const q = query(collection(db, "tools_history"), where("uid", "==", user.uid), orderBy("timestamp", "desc"));
-                const snap = await getDocs(q);
-                snap.forEach(doc => items.push(doc.data()));
+                try {
+                    const snap = await getDocs(q);
+                    snap.forEach(doc => items.push(doc.data()));
+                } catch(e) { console.log("History restricted or empty"); }
             } else {
                 items = JSON.parse(localStorage.getItem('neuron_history') || '[]');
             }
 
             if (items.length === 0) { list.innerHTML = 'История пуста'; return; }
 
+            list.innerHTML = '';
             items.forEach(item => {
                 const div = document.createElement('div');
                 div.className = 'history-item';
                 const date = item.timestamp?.seconds ? new Date(item.timestamp.seconds * 1000).toLocaleString() : new Date(item.timestamp).toLocaleString();
-                div.innerHTML = `<span class="tool-tag">${item.tool}</span> <span class="date">${date}</span><br>${JSON.stringify(item.content)}`;
+                div.innerHTML = `<span class="tool-tag">${item.tool}</span> <span class="date">${date}</span><br>
+                                 <small style="color:#555">${typeof item.content === 'object' ? JSON.stringify(item.content) : item.content}</small>`;
                 list.appendChild(div);
             });
         };
 
         // Auth listeners
-        document.getElementById('btnLogin').onclick = () => signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value).then(()=>authModal.style.display='none');
+        document.getElementById('btnLogin').onclick = () => signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value).then(()=>authModal.style.display='none').catch(e=>alert(e.message));
+        document.getElementById('btnRegister').onclick = () => createUserWithEmailAndPassword(auth, regEmail.value, regPassword.value).then(()=>authModal.style.display='none').catch(e=>alert(e.message));
         document.getElementById('btnGoogle').onclick = () => signInWithPopup(auth, provider).then(()=>authModal.style.display='none');
         document.getElementById('authBtn').onclick = () => auth.currentUser ? signOut(auth) : authModal.style.display='flex';
         
         onAuthStateChanged(auth, user => {
             authBtn.textContent = user ? `Выйти (${user.email.split('@')[0]})` : 'Вход / Регистрация';
-            loadHistory();
+            if(document.getElementById('historyTab').style.display === 'block') loadHistory();
         });
 
-        // Формы
         toRegister.onclick = () => { loginForm.style.display='none'; registerForm.style.display='block'; };
         toLogin.onclick = () => { loginForm.style.display='block'; registerForm.style.display='none'; };
         closeModal.onclick = () => authModal.style.display='none';
@@ -228,32 +247,59 @@
             for (let t of tabs) t.classList.remove("active");
             document.getElementById(name).style.display = "block";
             evt.currentTarget.classList.add("active");
-            if(name === 'historyTab') window.loadHistory();
+            if(name === 'historyTab' && window.loadHistory) window.loadHistory();
         }
 
         function analyzeText() {
-            const txt = document.getElementById('textInput').innerText;
-            document.getElementById('wordCount').textContent = txt.split(/\s+/).filter(w => w.length > 0).length;
+            const txt = document.getElementById('textInput').innerText.trim();
+            document.getElementById('wordCount').textContent = txt ? txt.split(/\s+/).length : 0;
             document.getElementById('charCount').textContent = txt.length;
         }
 
         function saveTextHistory() {
-            const txt = document.getElementById('textInput').innerText;
+            const txt = document.getElementById('textInput').innerText.trim();
             if(txt.length < 2) return;
-            window.saveToHistory('Анализ текста', { length: txt.length, preview: txt.substring(0, 30) + "..." });
-            alert("Результат сохранен в историю");
+            window.saveToHistory('Анализ текста', { chars: txt.length, preview: txt.substring(0, 40) + "..." });
+            alert("Сохранено!");
         }
 
         function generateQR() {
-            const val = document.getElementById('dataInput').value;
-            if(!val) return;
-            const canvas = document.getElementById('qrCombinedCanvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 200; canvas.height = 200;
-            new QRCode(document.createElement('div'), { text: val, width: 200, height: 200, useSVG: false }).makeCode(val);
-            // В реальном qrcode.js нужно дождаться рендера, здесь упрощенно для логики:
-            window.saveToHistory('QR Код', { data: val });
-            document.getElementById('qrOutputContainer').style.display = 'block';
+            const val = document.getElementById('dataInput').value.trim();
+            if(!val) return alert("Введите данные");
+            
+            const hiddenContainer = document.getElementById('qrcode-hidden');
+            hiddenContainer.innerHTML = '';
+            
+            const qr = new QRCode(hiddenContainer, {
+                text: val,
+                width: 256,
+                height: 256,
+                correctLevel: QRCode.CorrectLevel.H
+            });
+
+            // Небольшая задержка, чтобы QRCode успел сгенерировать img/canvas
+            setTimeout(() => {
+                const canvas = document.getElementById('qrCombinedCanvas');
+                const ctx = canvas.getContext('2d');
+                const sourceImg = hiddenContainer.querySelector('img') || hiddenContainer.querySelector('canvas');
+                
+                canvas.width = 256;
+                canvas.height = 290;
+                ctx.fillStyle = "white";
+                ctx.fillRect(0, 0, 256, 290);
+                
+                // Рисуем сам QR
+                ctx.drawImage(sourceImg, 0, 0, 256, 256);
+                
+                // Подпись
+                ctx.fillStyle = "#1a73e8";
+                ctx.font = "bold 14px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText("Neuron Ecosystem", 128, 278);
+                
+                document.getElementById('qrOutputContainer').style.display = 'block';
+                window.saveToHistory('Генерация QR', { data: val });
+            }, 100);
         }
 
         document.getElementById('imageInput').onchange = function(e) {
@@ -261,13 +307,15 @@
             if(!file) return;
             EXIF.getData(file, function() {
                 const model = EXIF.getTag(this, "Model") || "Неизвестно";
-                document.getElementById('exifModel').textContent = model;
+                const make = EXIF.getTag(this, "Make") || "";
+                document.getElementById('exifModel').textContent = make + " " + model;
+                document.getElementById('exifDetails').textContent = `Размер: ${(file.size/1024).toFixed(1)} KB`;
                 document.getElementById('exifData').style.display = 'block';
-                window.saveToHistory('EXIF', { fileName: file.name, model: model });
+                window.saveToHistory('EXIF просмотр', { file: file.name, model: model });
             });
         };
 
-        document.getElementById('defaultOpen').click();
+        window.onload = () => document.getElementById('defaultOpen').click();
     </script>
 </body>
 </html>
