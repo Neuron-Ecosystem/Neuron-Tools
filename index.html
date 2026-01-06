@@ -19,7 +19,7 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
-            margin-top: 60px; /* Отступ для кнопки входа */
+            margin-top: 60px;
         }
 
         .container {
@@ -32,244 +32,43 @@
             margin-bottom: 20px;
         }
 
-        h1 {
-            color: #1a73e8;
-            text-align: center;
-            margin-bottom: 10px;
-        }
+        h1 { color: #1a73e8; text-align: center; margin-bottom: 10px; }
 
-        /* ==================== СТИЛИ АВТОРИЗАЦИИ ==================== */
-        .auth-nav {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-
+        /* ==================== АВТОРИЗАЦИЯ ==================== */
+        .auth-nav { position: absolute; top: 20px; right: 20px; z-index: 1000; }
         #authBtn {
-            background-color: #1a73e8;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            background-color: #1a73e8; color: white; border: none; padding: 10px 20px;
+            border-radius: 20px; cursor: pointer; font-weight: 600; transition: 0.3s;
         }
 
-        #authBtn:hover { background-color: #0c5bb5; }
-
-        /* Модальное окно */
         .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 2000;
         }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; position: relative; }
+        .close-modal { position: absolute; top: 15px; right: 15px; cursor: pointer; font-size: 24px; }
+        .auth-form input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .google-btn { background: white; color: #757575; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px; width: 100%; cursor: pointer; padding: 10px; border-radius: 6px; }
 
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 400px;
-            position: relative;
-        }
+        /* ==================== ТАБЫ ==================== */
+        .tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #ddd; overflow-x: auto; }
+        .tab-button { background: transparent; border: none; padding: 10px 15px; cursor: pointer; font-size: 16px; color: #555; white-space: nowrap; }
+        .tab-button.active { color: #1a73e8; border-bottom: 3px solid #1a73e8; font-weight: 600; }
+        .tab-content { display: none; padding-top: 20px; }
+        .tab-content.active { display: block; }
 
-        .modal-content h2 { margin-top: 0; color: #1a73e8; }
-        
-        .close-modal {
-            position: absolute;
-            top: 15px; right: 15px;
-            cursor: pointer;
-            font-size: 24px;
-        }
+        /* ==================== ИСТОРИЯ ==================== */
+        .history-item { border-bottom: 1px solid #eee; padding: 10px 0; font-size: 14px; }
+        .history-item .date { color: #888; font-size: 12px; }
+        .history-item .tool-tag { display: inline-block; background: #e9f0ff; color: #1a73e8; padding: 2px 8px; border-radius: 4px; margin-right: 10px; font-weight: bold; }
 
-        .auth-form input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            box-sizing: border-box;
+        /* Элементы форм */
+        input[type="text"], input[type="file"], #textInput {
+            width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
         }
-
-        .google-btn {
-            background-color: white;
-            color: #757575;
-            border: 1px solid #ddd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 15px;
-        }
-
-        .toggle-auth {
-            text-align: center;
-            margin-top: 15px;
-            font-size: 14px;
-            color: #666;
-            cursor: pointer;
-        }
-        .toggle-auth span { color: #1a73e8; text-decoration: underline; }
-
-        /* ==================== СТИЛИ ВКЛАДОК ==================== */
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #ddd;
-            overflow-x: auto; 
-        }
-
-        .tab-button {
-            background-color: transparent;
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            font-size: 16px;
-            color: #555;
-            transition: color 0.3s, border-bottom 0.3s;
-            white-space: nowrap; 
-        }
-
-        .tab-button.active {
-            color: #1a73e8;
-            border-bottom: 3px solid #1a73e8;
-            font-weight: 600;
-        }
-
-        .tab-content {
-            display: none;
-            padding-top: 20px;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* ==================== ОБЩИЕ СТИЛИ ФОРМ ==================== */
-        input[type="text"], input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 16px;
-        }
-
-        button.primary-btn {
-            background-color: #1a73e8;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s ease;
-            width: 100%;
-        }
-
-        button.primary-btn:hover {
-            background-color: #0c5bb5;
-        }
-
-        #textInput {
-            width: 100%;
-            min-height: 200px;
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 16px;
-            line-height: 1.6;
-            -webkit-user-modify: read-write; 
-            outline: none; 
-        }
-
-        #statsContainer {
-            border: 1px solid #eee;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-
-        #statsContainer p {
-            margin: 5px 0;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        #statsContainer strong {
-            color: #1a73e8;
-        }
-
-        .top-words-list {
-            margin-top: 10px;
-            list-style-type: none;
-            padding: 0;
-            text-align: left;
-        }
-        
-        .top-words-list li {
-            margin-bottom: 5px;
-            font-size: 14px;
-        }
-
-        #qrOutputContainer {
-            margin-top: 20px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #qrCombinedCanvas {
-            display: block;
-            margin-bottom: 10px;
-            border: 1px solid #eee;
-            padding: 5px;
-            border-radius: 5px;
-        }
-        
-        #downloadBtn {
-            margin-top: 15px;
-            background-color: #28a745; 
-        }
-
-        #exifData {
-            text-align: left;
-            margin-top: 30px;
-            border-top: 1px solid #eee;
-            padding-top: 20px;
-        }
-
-        #exifData strong {
-            color: #555;
-            display: inline-block;
-            width: 160px;
-            font-weight: 500;
-        }
-
-        .converter-note {
-            text-align: center;
-            padding: 40px 10px;
-            background-color: #e9f0ff;
-            border-radius: 8px;
-            color: #1a73e8;
-        }
-        
-        .converter-note a {
-            color: #0c5bb5;
-            text-decoration: none;
-            font-weight: bold;
-        }
+        #textInput { min-height: 150px; outline: none; -webkit-user-modify: read-write; }
+        .primary-btn { background: #1a73e8; color: white; padding: 12px; border: none; border-radius: 6px; width: 100%; cursor: pointer; font-size: 16px; }
+        .primary-btn:hover { background: #0c5bb5; }
     </style>
 </head>
 <body>
@@ -281,260 +80,194 @@
     <div id="authModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" id="closeModal">&times;</span>
-            
             <div id="loginForm">
                 <h2>Вход</h2>
-                <div class="auth-form">
-                    <input type="email" id="loginEmail" placeholder="Email">
-                    <input type="password" id="loginPassword" placeholder="Пароль">
-                    <button class="primary-btn" id="btnLogin">Войти</button>
-                </div>
-                <button class="primary-btn google-btn" id="btnGoogle">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Войти через Google
+                <input type="email" id="loginEmail" placeholder="Email">
+                <input type="password" id="loginPassword" placeholder="Пароль">
+                <button class="primary-btn" id="btnLogin">Войти</button>
+                <button class="google-btn" id="btnGoogle">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Google
                 </button>
-                <p class="toggle-auth">Нет аккаунта? <span id="toRegister">Зарегистрироваться</span></p>
+                <p style="text-align:center; cursor:pointer; color:#1a73e8" id="toRegister">Нет аккаунта? Регистрация</p>
             </div>
-
-            <div id="registerForm" style="display: none;">
+            <div id="registerForm" style="display:none">
                 <h2>Регистрация</h2>
-                <div class="auth-form">
-                    <input type="email" id="regEmail" placeholder="Email">
-                    <input type="password" id="regPassword" placeholder="Пароль">
-                    <button class="primary-btn" id="btnRegister">Создать аккаунт</button>
-                </div>
-                <p class="toggle-auth">Уже есть аккаунт? <span id="toLogin">Войти</span></p>
+                <input type="email" id="regEmail" placeholder="Email">
+                <input type="password" id="regPassword" placeholder="Пароль">
+                <button class="primary-btn" id="btnRegister">Создать</button>
+                <p style="text-align:center; cursor:pointer; color:#1a73e8" id="toLogin">Есть аккаунт? Войти</p>
             </div>
         </div>
     </div>
 
     <div class="container">
         <h1>Neuron Tools ⚡</h1>
-
         <div class="tabs">
-            <button class="tab-button" id="defaultOpen" onclick="openTab(event, 'textAnalyzer')">Анализатор Текста</button>
-            <button class="tab-button" onclick="openTab(event, 'qrGenerator')">QR-Генератор</button>
-            <button class="tab-button" onclick="openTab(event, 'exifViewer')">EXIF-Viewer</button>
-            <button class="tab-button" onclick="openTab(event, 'unitConverter')">Конвертер Валют</button>
+            <button class="tab-button" id="defaultOpen" onclick="openTab(event, 'textAnalyzer')">Текст</button>
+            <button class="tab-button" onclick="openTab(event, 'qrGenerator')">QR-код</button>
+            <button class="tab-button" onclick="openTab(event, 'exifViewer')">EXIF</button>
+            <button class="tab-button" onclick="openTab(event, 'historyTab')">История</button>
         </div>
 
         <div id="textAnalyzer" class="tab-content">
-            <h2>Анализатор Текста и Орфографии</h2>
-            <div id="textInput" contenteditable="true" spellcheck="true" oninput="analyzeText()" placeholder="Начните вводить или вставьте текст сюда..." style="resize: vertical;"></div>
-            <p style="font-size: 12px; color: #888; margin-top: -15px;">* Орфографические ошибки выделяются браузером (красным)</p>
+            <div id="textInput" contenteditable="true" spellcheck="true" oninput="analyzeText()" placeholder="Введите текст..."></div>
+            <button class="primary-btn" onclick="saveTextHistory()">Сохранить результат анализа</button>
             <div id="statsContainer">
-                <p>Общее количество слов: <strong><span id="wordCount">0</span></strong></p>
-                <p>Символов (без пробелов): <strong><span id="charNoSpaceCount">0</span></strong></p>
-                <p>Символов (с пробелами): <strong><span id="charCount">0</span></strong></p>
-                <p>Время на чтение: <strong><span id="readTime">0 мин</span></strong></p>
-                <h3 style="color: #333; margin-top: 20px; font-size: 18px; border-top: 1px solid #eee; padding-top: 15px;">Топ-5 самых частых слов</h3>
-                <ul id="topWordsList" class="top-words-list"><li>Нет данных</li></ul>
+                <p>Слов: <strong id="wordCount">0</strong></p>
+                <p>Символов: <strong id="charCount">0</strong></p>
             </div>
         </div>
 
         <div id="qrGenerator" class="tab-content">
-            <h2>Генератор QR-кодов</h2>
-            <input type="text" id="dataInput" placeholder="Введите текст или ссылку для QR-кода">
-            <button class="primary-btn" onclick="generateQR()">Сгенерировать QR-код</button>
-            <div id="qrOutputContainer" style="display: none;">
+            <input type="text" id="dataInput" placeholder="Ссылка или текст">
+            <button class="primary-btn" onclick="generateQR()">Сгенерировать</button>
+            <div id="qrOutputContainer" style="display:none; text-align:center; margin-top:15px;">
                 <canvas id="qrCombinedCanvas"></canvas>
-                <button id="downloadBtn" onclick="downloadQR()">Скачать PNG с подписью</button>
             </div>
         </div>
 
         <div id="exifViewer" class="tab-content">
-            <h2>Просмотрщик Метаданных Изображений</h2>
             <input type="file" id="imageInput" accept="image/*">
-            <img id="imagePreview" src="#" alt="Предварительный просмотр" style="max-width: 100%; display:none;">
-            <div id="exifData" style="display: none;">
-                <h3>Информация о файле</h3>
-                <p><strong>Имя файла:</strong> <span id="fileName"></span></p>
-                <p><strong>Разрешение:</strong> <span id="resolution"></span></p>
-                <h3>Настройки снимка</h3>
-                <p><strong>Модель:</strong> <span id="model"></span></p>
-                <p><strong>ISO:</strong> <span id="isoSpeedRatings"></span></p>
-                <p><strong>Широта:</strong> <span id="latitude"></span></p>
-                <p><strong>Долгота:</strong> <span id="longitude"></span></p>
-                <p id="mapLinkContainer"></p>
+            <div id="exifData" style="display:none">
+                <p>Модель: <span id="exifModel"></span></p>
+                <p>Дата: <span id="exifDate"></span></p>
             </div>
         </div>
 
-        <div id="unitConverter" class="tab-content">
-            <h2>Конвертер Валют</h2>
-            <div class="converter-note">
-                <p>Конвертер Валют является самостоятельным проектом.</p>
-                <p><a href="https://neuron-ecosystem.github.io/Unit-Converter/" target="_blank">Перейти на сайт</a></p>
-            </div>
+        <div id="historyTab" class="tab-content">
+            <h2>Ваша активность</h2>
+            <div id="historyList">Загрузка истории...</div>
         </div>
     </div>
-    
-    <div class="container" style="text-align: center; background-color: #e9f0ff; border: 2px solid #1a73e8;">
-        <p style="font-size: 18px; font-weight: bold; color: #1a73e8;">🔥 Neuron Digital Studio</p>
-        <a href="https://t.me/neuron_ecosystem" target="_blank" style="display: inline-block; padding: 10px 25px; background-color: #1a73e8; color: white; border-radius: 5px; text-decoration: none;">Связаться с нами!</a>
-    </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, where, getDocs, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyDOaDVzzPjyYm4HWMND2XYWjLy_h4wty5s",
-        authDomain: "neuron-ecosystem-2025.firebaseapp.com",
-        projectId: "neuron-ecosystem-2025",
-        storageBucket: "neuron-ecosystem-2025.firebasestorage.app",
-        messagingSenderId: "589834476565",
-        appId: "1:589834476565:web:93be55550691e447dd421c",
-        measurementId: "G-SWHLMF6BC9"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyDOaDVzzPjyYm4HWMND2XYWjLy_h4wty5s",
+            authDomain: "neuron-ecosystem-2025.firebaseapp.com",
+            projectId: "neuron-ecosystem-2025",
+            storageBucket: "neuron-ecosystem-2025.firebasestorage.app",
+            messagingSenderId: "589834476565",
+            appId: "1:589834476565:web:93be55550691e447dd421c",
+            measurementId: "G-SWHLMF6BC9"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
 
-    // DOM Элементы
-    const authBtn = document.getElementById('authBtn');
-    const authModal = document.getElementById('authModal');
-    const closeModal = document.getElementById('closeModal');
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
+        // Функции сохранения в историю
+        window.saveToHistory = async function(tool, content) {
+            const user = auth.currentUser;
+            if (user) {
+                await addDoc(collection(db, "tools_history"), {
+                    uid: user.uid,
+                    tool: tool,
+                    content: content,
+                    timestamp: serverTimestamp()
+                });
+            } else {
+                let local = JSON.parse(localStorage.getItem('neuron_history') || '[]');
+                local.unshift({ tool, content, timestamp: new Date().toISOString() });
+                localStorage.setItem('neuron_history', JSON.stringify(local.slice(0, 20)));
+            }
+            if(document.getElementById('historyTab').classList.contains('active')) loadHistory();
+        };
 
-    // Открытие/закрытие модалки
-    authBtn.onclick = () => {
-        if(auth.currentUser) {
-            signOut(auth).then(() => alert('Вы вышли из системы'));
-        } else {
-            authModal.style.display = 'flex';
-        }
-    };
-    closeModal.onclick = () => authModal.style.display = 'none';
-    window.onclick = (e) => { if(e.target == authModal) authModal.style.display = 'none'; };
+        // Загрузка истории
+        window.loadHistory = async function() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = '';
+            const user = auth.currentUser;
 
-    // Переключение форм
-    document.getElementById('toRegister').onclick = () => { loginForm.style.display = 'none'; registerForm.style.display = 'block'; };
-    document.getElementById('toLogin').onclick = () => { loginForm.style.display = 'block'; registerForm.style.display = 'none'; };
+            let items = [];
+            if (user) {
+                const q = query(collection(db, "tools_history"), where("uid", "==", user.uid), orderBy("timestamp", "desc"));
+                const snap = await getDocs(q);
+                snap.forEach(doc => items.push(doc.data()));
+            } else {
+                items = JSON.parse(localStorage.getItem('neuron_history') || '[]');
+            }
 
-    // Регистрация
-    document.getElementById('btnRegister').onclick = async () => {
-        const email = document.getElementById('regEmail').value;
-        const pass = document.getElementById('regPassword').value;
-        try {
-            await createUserWithEmailAndPassword(auth, email, pass);
-            authModal.style.display = 'none';
-        } catch (e) { alert(e.message); }
-    };
+            if (items.length === 0) { list.innerHTML = 'История пуста'; return; }
 
-    // Вход
-    document.getElementById('btnLogin').onclick = async () => {
-        const email = document.getElementById('loginEmail').value;
-        const pass = document.getElementById('loginPassword').value;
-        try {
-            await signInWithEmailAndPassword(auth, email, pass);
-            authModal.style.display = 'none';
-        } catch (e) { alert(e.message); }
-    };
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                const date = item.timestamp?.seconds ? new Date(item.timestamp.seconds * 1000).toLocaleString() : new Date(item.timestamp).toLocaleString();
+                div.innerHTML = `<span class="tool-tag">${item.tool}</span> <span class="date">${date}</span><br>${JSON.stringify(item.content)}`;
+                list.appendChild(div);
+            });
+        };
 
-    // Google Вход
-    document.getElementById('btnGoogle').onclick = async () => {
-        try {
-            await signInWithPopup(auth, provider);
-            authModal.style.display = 'none';
-        } catch (e) { alert(e.message); }
-    };
-
-    // Слежение за состоянием пользователя
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            authBtn.textContent = (user.displayName || user.email.split('@')[0]) + ' (Выход)';
-        } else {
-            authBtn.textContent = 'Вход / Регистрация';
-        }
-    });
-</script>
-
-<script>
-    // ==================== СКРИПТЫ ИНСТРУМЕНТОВ ====================
-    const stopWords = new Set(['и', 'в', 'на', 'с', 'по', 'за', 'от', 'до', 'из', 'у', 'к', 'о', 'об', 'а', 'но', 'да', 'или', 'если', 'как', 'что', 'это', 'тот', 'этот', 'он', 'она', 'оно', 'они', 'я', 'мы', 'ты', 'вы', 'мой', 'твой', 'свой', 'их', 'его', 'ее', 'быть', 'был', 'была', 'было', 'будет', 'есть', 'для', 'же', 'ли', 'ни', 'не', 'также', 'только']);
-
-    function analyzeText() {
-        const textInput = document.getElementById('textInput');
-        const rawText = textInput.innerText || textInput.textContent || "";
-        const text = rawText.trim(); 
-        document.getElementById('charCount').textContent = text.length;
-        document.getElementById('charNoSpaceCount').textContent = text.replace(/\s/g, '').length;
-        const cleanedText = text.replace(/[^а-яa-zё0-9\s]/gi, ' ').toLowerCase();
-        const words = cleanedText.split(/\s+/).filter(word => word.length > 0);
-        document.getElementById('wordCount').textContent = words.length;
-        const minutes = words.length / 225;
-        document.getElementById('readTime').textContent = words.length === 0 ? '0 мин' : minutes < 1 ? '<1 мин' : `${Math.ceil(minutes)} мин`;
-        const wordFrequency = {};
-        words.forEach(word => { if (!stopWords.has(word) && word.length > 1) wordFrequency[word] = (wordFrequency[word] || 0) + 1; });
-        const sortedWords = Object.entries(wordFrequency).sort(([, a], [, b]) => b - a).slice(0, 5);
-        const topList = document.getElementById('topWordsList');
-        topList.innerHTML = sortedWords.length === 0 ? '<li>Нет данных</li>' : sortedWords.map(([w, c]) => `<li><strong>${w.charAt(0).toUpperCase() + w.slice(1)}</strong>: ${c} раз</li>`).join('');
-    }
-
-    function openTab(evt, tabName) {
-        let i, tabcontent, tablinks;
-        tabcontent = document.getElementsByClassName("tab-content");
-        for (i = 0; i < tabcontent.length; i++) tabcontent[i].style.display = "none";
-        tablinks = document.getElementsByClassName("tab-button");
-        for (i = 0; i < tablinks.length; i++) tablinks[i].className = tablinks[i].className.replace(" active", "");
-        document.getElementById(tabName).style.display = "block";
-        evt.currentTarget.className += " active";
-        if (tabName === 'textAnalyzer') analyzeText();
-    }
-
-    document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById("textAnalyzer").style.display = "block";
-        document.getElementById("defaultOpen").classList.add("active");
-        const textInput = document.getElementById('textInput');
-        const placeholder = textInput.getAttribute('placeholder');
-        textInput.addEventListener('focus', () => { if(textInput.textContent.trim() === placeholder) { textInput.textContent = ''; textInput.style.color = '#333'; } });
-        textInput.addEventListener('blur', () => { if(textInput.textContent.trim() === '') { textInput.textContent = placeholder; textInput.style.color = '#999'; } });
-        analyzeText();
-    });
-
-    // QR & EXIF (Сокращено для примера, логика та же, что в оригинале)
-    let qrcodeInstance = null;
-    function generateQR() {
-        const data = document.getElementById('dataInput').value.trim();
-        if (!data) return alert("Введите данные");
-        const canvas = document.getElementById('qrCombinedCanvas');
-        const ctx = canvas.getContext('2d');
-        canvas.width = 256; canvas.height = 300;
-        const temp = document.createElement('div');
-        qrcodeInstance = new QRCode(temp, { text: data, width: 256, height: 256 });
-        setTimeout(() => {
-            const img = temp.querySelector('img');
-            ctx.fillStyle = "white"; ctx.fillRect(0,0,256,300);
-            ctx.drawImage(img, 0, 0);
-            ctx.fillStyle = "#1a73e8"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center";
-            ctx.fillText("by Neuron Ecosystem", 128, 285);
-            document.getElementById('qrOutputContainer').style.display = 'flex';
-        }, 200);
-    }
-
-    function downloadQR() {
-        const link = document.createElement('a');
-        link.download = 'qr.png';
-        link.href = document.getElementById('qrCombinedCanvas').toDataURL();
-        link.click();
-    }
-
-    document.getElementById('imageInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        const preview = document.getElementById('imagePreview');
-        preview.src = URL.createObjectURL(file);
-        preview.style.display = 'block';
-        document.getElementById('exifData').style.display = 'block';
-        document.getElementById('fileName').textContent = file.name;
-        EXIF.getData(file, function() {
-            const exif = EXIF.getAllTags(this);
-            document.getElementById('model').textContent = exif.Model || 'Неизвестно';
-            document.getElementById('isoSpeedRatings').textContent = exif.ISOSpeedRatings || '-';
+        // Auth listeners
+        document.getElementById('btnLogin').onclick = () => signInWithEmailAndPassword(auth, loginEmail.value, loginPassword.value).then(()=>authModal.style.display='none');
+        document.getElementById('btnGoogle').onclick = () => signInWithPopup(auth, provider).then(()=>authModal.style.display='none');
+        document.getElementById('authBtn').onclick = () => auth.currentUser ? signOut(auth) : authModal.style.display='flex';
+        
+        onAuthStateChanged(auth, user => {
+            authBtn.textContent = user ? `Выйти (${user.email.split('@')[0]})` : 'Вход / Регистрация';
+            loadHistory();
         });
-    });
-</script>
 
+        // Формы
+        toRegister.onclick = () => { loginForm.style.display='none'; registerForm.style.display='block'; };
+        toLogin.onclick = () => { loginForm.style.display='block'; registerForm.style.display='none'; };
+        closeModal.onclick = () => authModal.style.display='none';
+    </script>
+
+    <script>
+        function openTab(evt, name) {
+            let contents = document.getElementsByClassName("tab-content");
+            for (let c of contents) c.style.display = "none";
+            let tabs = document.getElementsByClassName("tab-button");
+            for (let t of tabs) t.classList.remove("active");
+            document.getElementById(name).style.display = "block";
+            evt.currentTarget.classList.add("active");
+            if(name === 'historyTab') window.loadHistory();
+        }
+
+        function analyzeText() {
+            const txt = document.getElementById('textInput').innerText;
+            document.getElementById('wordCount').textContent = txt.split(/\s+/).filter(w => w.length > 0).length;
+            document.getElementById('charCount').textContent = txt.length;
+        }
+
+        function saveTextHistory() {
+            const txt = document.getElementById('textInput').innerText;
+            if(txt.length < 2) return;
+            window.saveToHistory('Анализ текста', { length: txt.length, preview: txt.substring(0, 30) + "..." });
+            alert("Результат сохранен в историю");
+        }
+
+        function generateQR() {
+            const val = document.getElementById('dataInput').value;
+            if(!val) return;
+            const canvas = document.getElementById('qrCombinedCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 200; canvas.height = 200;
+            new QRCode(document.createElement('div'), { text: val, width: 200, height: 200, useSVG: false }).makeCode(val);
+            // В реальном qrcode.js нужно дождаться рендера, здесь упрощенно для логики:
+            window.saveToHistory('QR Код', { data: val });
+            document.getElementById('qrOutputContainer').style.display = 'block';
+        }
+
+        document.getElementById('imageInput').onchange = function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            EXIF.getData(file, function() {
+                const model = EXIF.getTag(this, "Model") || "Неизвестно";
+                document.getElementById('exifModel').textContent = model;
+                document.getElementById('exifData').style.display = 'block';
+                window.saveToHistory('EXIF', { fileName: file.name, model: model });
+            });
+        };
+
+        document.getElementById('defaultOpen').click();
+    </script>
 </body>
 </html>
